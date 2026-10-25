@@ -202,7 +202,60 @@ reachable without root.
 4. HA workaround remains the fallback for full TV control if broadcasts
    regress permanently.
 
-## Remedies (realistic)
+## Regression + repro attempts + reboot verdict (2026-10-25 evening)
+
+User reported broadcasts broken again (TV doesn't turn off with box
+standby; no input switching). Timeline forensics from dumpsys history:
+
+- GOOD WINDOW BOUNDED: broadcasts ACKed 18:06:51 → 18:07:06 only
+  (~50 s), spanning the user's standby/wake test cycles. First NACK
+  broadcast after: 18:08:35 (Report Physical Address). From 18:29 on
+  all broadcasts NACK while directed sends ACK normally. During the
+  window the TV genuinely reacted (turned off 3× with box standby; the
+  PS5 followed the TV to sleep — the bus was truly healthy).
+- PS5-STATE THEORY REFUTED: PS5 actively played throughout the
+  regression window and the repro attempts. Its presence/state does not
+  correlate with the failure.
+- REPRO ATTEMPT 18:49 (re-init toggle + immediate standby/wake cycle):
+  broadcasts NACK from the very first send (+20 s) and stayed NACK at
+  +120/+180 s. The re-init+cycle combo does NOT reproduce the good
+  window.
+- REBOOT 18:56 (fresh stack, boot-time settings read):
+  - Broadcasts NACK from the FIRST boot-time send (<Device Vendor Id>
+    18:56:23); <Text View On> directed ACKed seconds later. No boot-time
+    good window — the box boots directly into the broken state.
+  - power_control_mode STILL reported "broadcast" by the framework even
+    at boot → the vendor CecSettingsManager NEVER reads the
+    Settings.Global key. **to_tv workaround definitively inert on
+    14.8.8963.** Setting deleted (net-zero; restore line removed).
+  - Debloat disables survived reboot (verify.sh OK).
+- The 50 s good window remains UNEXPLAINED. Unique events preceding it:
+  power_control_mode=to_tv settings WRITE at 18:03 (an observer trigger
+  in the vendor stack?), CEC re-init at 18:05, PS5 came online ~17:59.
+  None of them reproduces it since.
+- Separate LG-side issue observed: with TV off, PS5 power-on does NOT
+  wake the TV (one-touch-play from PS5 fails); TV power-on pushes the
+  PS5 back to sleep. LG SimpLink/Quick Start+ behavior — TV-side,
+  independent of the box.
+
+### Where this leaves the CEC problem
+
+Box broadcasts are broken in ALL controllable states (steady, post
+re-init, post reboot); directed always works; no settings-level fix
+exists on this firmware. Remaining paths, in order:
+1. Physical exclusion: box → TV HDMI4 + different cable (user hands;
+   low expectation but the only untried variable).
+2. Vendor bug report to SEI/Homatics — evidence pack is complete:
+   driver logs (directed success / broadcast "no ack" at hdmicecd
+   level), the one 50 s healthy window with bounds, boot-fresh broken
+   state, REA decompilation of the dual-HAL-client architecture
+   (inventory/rea-cec.md), firmware 14.8.8963, LG OLED55C35L + PS5 bus.
+3. Practical workaround: Home Assistant — box stays pingable in
+   standby (baseline wake test); drive the TV via the LG webOS
+   integration for power/input control.
+4. LG side: SimpLink settings / TV firmware for the PS5-wake issue.
+
+## Remedies (realistic) — superseded rankings below, see evening section
 
 1. Vendor OTA / Homatics firmware update — the only real fix; the bug is
    in the vendor CEC HAL/kernel path. Re-test with this note's method
