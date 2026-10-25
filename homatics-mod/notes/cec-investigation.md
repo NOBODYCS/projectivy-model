@@ -84,7 +84,37 @@ including <Set Osd Name> to the TV. **Not a stuck driver state.**
 The 0→1 toggle netted to zero, so both lines were removed from
 applied-settings.log (replaying them would have left CEC disabled).
 
-## Conclusion
+## Phase 7 driver-level test (2026-10-25, per cec-tool.sh)
+
+7.0 status (device/runs/2026-10-25-180023-cec-status.txt):
+- power_control_mode storage: NEITHER plain nor cec_-prefixed global key
+  exists yet (both null); framework runs on the built-in default
+  "broadcast" (dumpsys CEC settings: power_control_mode broadcast
+  [modifiable]). Workaround has a clean slot to write into.
+- /sys/class/cec/* (Amlogic aocec, fe044000.aocec): cmd/dump_reg etc.
+  exist but are ROOT-ONLY — SELinux denies the shell domain even
+  getattr (avc audit lines in the test log). No sysfs TX from adb.
+
+7.1 driver-level asymmetry test (device/runs/2026-10-25-180032-cec-test.txt):
+- All three sysfs writes REJECTED (Permission denied) → **VERDICT (c)**:
+  driver test impossible without root; rely on HAL-level evidence +
+  power_control_mode workaround.
+- BONUS evidence from the hdmicecd (vendor HAL daemon) logcat tail:
+  `printCecMsgBuf, msg: 0f 87 00 e0 91` every 14 s = the TV's broadcast
+  <Device Vendor ID> (LG 0x00E091) IS RECEIVED at driver level, and an
+  address re-allocation cycle logged by hdmicecd.
+- BUS TOPOLOGY CHANGED since the original captures: soundbar still
+  unplugged; PS5 Pro now on the bus (logical 0x04, PA 0x1000, HDMI1);
+  the TV is now FULLY learned by the framework (OLED55C35L, vendor
+  0x00E091, PA 0x0000 — all learned via broadcast messages from the TV).
+  Broadcast RX now propagates driver→framework; broadcast TX state to
+  be re-checked in the 7.2 verify capture.
+
+Tool fixes while running 7.0/7.1 (same bug class as Phase 3 apply.sh):
+- cec-tool.sh status died rc=141 (SIGPIPE from `dumpsys | head -60` +
+  pipefail) and rc=1 (sysfs probe pipeline) — both now failure-tolerant.
+
+## Conclusion (pre-Phase-7)
 
 **Root cause: the box's own vendor CEC stack (Amlogic/DroidLogic/SEI)
 cannot send broadcast messages** — they all fail at the driver/HAL level
@@ -102,6 +132,75 @@ com.sei.hdmi.services protected; symptom predates modding).
 Remaining untested: HDMI port/cable (hypothesis C) — box on HDMI4 with a
 new physical address. Low expectation: an electrical fault cannot explain
 the directed-vs-broadcast asymmetry, but it is the only variable left.
+
+## Phase 7.2 workaround apply + standby test (2026-10-25)
+
+- fix-on applied: settings put global power_control_mode=to_tv (restore
+  line in applied-settings.log; old value was unset). cec_-prefixed key
+  not present (skipped per tool).
+- Framework did NOT pick the value up live: dumpsys CEC settings kept
+  reporting power_control_mode=broadcast even after a full CEC re-init
+  (hdmi_control_enabled 0→1 toggle, net-zero, log pair removed). The
+  vendor CecSettingsManager caches at service start / may use another
+  store — REA 7.3 to confirm. Expect to_tv to take effect only after a
+  full reboot (boot-time read).
+- USER STANDBY TEST (multiple cycles): TV turns off with box standby
+  every time; box wakes fine. PASS.
+- Verify capture device/runs/2026-10-25-180747-cec-verify.txt shows the
+  mechanism is NOT the workaround: the box sent BROADCAST <Standby>
+  8F:36 (ACK) — not directed 80:36 — and the TV followed with its own
+  0F:36 standby 5 s later. **Broadcast sends started getting ACKed**
+  between 17:04 (last known-NACK) and 18:06. Wake cycle shows
+  <Text View On> 80:0D (ACK) AND <Active Source> 8F:82:30:00 (ACK) ×3 —
+  one-touch-play broadcast now works too. Changed variables in that
+  window: PS5 Pro came online (logical 4, PA 0x1000) with an hdmicecd
+  address re-allocation cycle at 17:59, CEC re-init at 18:05,
+  to_tv setting at 18:03. Cannot attribute without A/B tests.
+- DECISION: to_tv setting KEPT (inert until reboot; after reboot it
+  forces directed <Standby> — insurance if broadcast-TX regresses,
+  directed path proven to always work). TV device info was re-learned
+  as unknown (vendor 0xFFFFFF, PA 0xFFFF) after the 18:05 re-init —
+  cosmetic, does not affect function.
+- Bug signature change: broadcast-TX failure is STATE-DEPENDENT (stuck
+  for days, fixed by bus change + re-init), not a hard path defect.
+  REA 7.3 should hunt for stuck-state/initialization bugs in the vendor
+  HAL, plus the power_control_mode storage-backend question.
+
+## Phase 7.3 REA pass + Phase 7 conclusion (2026-10-25)
+
+REA findings in inventory/rea-cec.md (evidence quotes there). Headline:
+**com.sei.hdmi.services holds its own parallel CEC HAL connection**
+(AIDL IHdmiCec, fallback HIDL cec@1.0/1.1), persistent, re-registering
+callbacks on every hotplug event — alongside system_server's
+HdmiControlService on the same single-callback HAL daemon (hdmicecd /
+fe044000.aocec). Dual-client callback stealing is the strongest
+candidate mechanism for the state-dependent broadcast failure/restore
+observed. power_control_mode is owned solely by the framework's
+CecSettingsManager (vendor UI/overlay/lib never touch it; the
+Settings.Global write does not apply live — boot-time read at best).
+The broadcast-drop/rewrite logic itself is in native hdmicecd — not
+reachable without root.
+
+### Recommended actions (updated by Phase 7)
+
+1. Current state WORKS (user-verified multiple cycles): TV turns off
+   with box standby; wake relationship normal. The to_tv setting stays
+   as belt-and-braces (applies after reboot if broadcasts regress
+   again).
+2. Durability watch (Phase 6 tie-in): after any reboot or OTA, re-run
+   `bash scripts/cec-tool.sh status` + a standby cycle. If broadcasts
+   regress (TV stops turning off), the to_tv reboot-read should catch
+   TV-off; one-key-play input switching would regress with it —
+   re-trigger with a CEC re-init toggle (hdmi_control_enabled 0→1,
+   net-zero) which empirically restored broadcast TX on 2026-10-25.
+3. Vendor bug report candidate: SEI Robotics — hdmicecd dual-client
+   callback arbitration (com.sei.hdmi.services.SeiHdmiCecService
+   p()/onReceived re-registering AIDL callbacks; framework broadcasts
+   NACK; hardware: Homatics Box R 4K Plus, firmware 14.8.8963, LG OLED55C35L
+   TV, PS5 on bus). An OTA fixing the callback re-registration in
+   hdmicecd/SeiHdmiCecService would be the real fix.
+4. HA workaround remains the fallback for full TV control if broadcasts
+   regress permanently.
 
 ## Remedies (realistic)
 

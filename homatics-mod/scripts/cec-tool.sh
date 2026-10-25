@@ -23,9 +23,13 @@ dump_cec_summary() {
   hdr "props"
   adb_cmd shell getprop | tr -d '\r' | grep -Ei 'hdmi|cec' || true
   hdr "dumpsys hdmi_control (head)"
-  adb_cmd shell dumpsys hdmi_control | tr -d '\r' | head -60
+  # head intentionally truncates a large stream -> upstream SIGPIPE is expected,
+  # not an error (same class as the Phase 3 apply.sh grep -qx fix).
+  adb_cmd shell dumpsys hdmi_control | tr -d '\r' | head -60 || true
   hdr "sysfs"
-  adb_cmd shell "ls -l $CEC_SYSFS/ 2>/dev/null; for f in physical_addr device_type vendor_id cec_version arc_port; do echo \"\$f: \$(cat $CEC_SYSFS/\$f 2>/dev/null)\"; done" | tr -d '\r'
+  # sysfs attrs are root-only on this box (cmd: Permission denied for shell) —
+  # probe tolerantly instead of letting pipefail abort the whole command.
+  adb_cmd shell "ls -l $CEC_SYSFS/ 2>/dev/null; for f in physical_addr device_type vendor_id cec_version arc_port; do echo \"\$f: \$(cat $CEC_SYSFS/\$f 2>/dev/null)\"; done" | tr -d '\r' || echo "sysfs not accessible to shell (expected: root-only attrs)"
 }
 
 case "${1:-}" in
@@ -51,7 +55,7 @@ EOF
       || { echo "sysfs write REJECTED (permissions / needs root) — record this"; exit 2; }
     sleep 1
     hdr "TX/RX register state after send"
-    adb_cmd shell "cat $CEC_SYSFS/dump_reg 2>/dev/null" | tr -d '\r' | head -30
+    adb_cmd shell "cat $CEC_SYSFS/dump_reg 2>/dev/null" | tr -d '\r' | head -30 || echo "dump_reg not readable (root-only)"
     hdr "kernel/logcat CEC lines (last 15 s)"
     adb_cmd shell "logcat -d -t '%k' | grep -Ei 'cec|hdmi' | tail -25" | tr -d '\r'
     ;;
@@ -71,7 +75,7 @@ EOF
     adb_cmd shell "echo 8F:82:30:00 > $CEC_SYSFS/cmd" 2>&1 | tr -d '\r' || echo "REJECTED"
     sleep 2
     hdr "dump_reg after all three"
-    adb_cmd shell "cat $CEC_SYSFS/dump_reg 2>/dev/null" | tr -d '\r' | head -30
+    adb_cmd shell "cat $CEC_SYSFS/dump_reg 2>/dev/null" | tr -d '\r' | head -30 || echo "dump_reg not readable (root-only)"
     hdr "logcat CEC tail"
     adb_cmd shell "logcat -d | grep -Ei 'cec' | tail -30" | tr -d '\r'
     cat <<'EOF'
