@@ -1,0 +1,22 @@
+# Projectivy launcher
+
+Official sources (use one, verify APK provenance before install):
+- Site: https://projectivylauncher.com/
+- GitHub releases: https://github.com/spocky/miproja1/releases
+- Play Store: com.spocky.projengmenu
+
+Install in Phase 3:
+```bash
+adb install Projectivy.apk        # or the release .apk downloaded from above
+```
+
+After install: open it once from the app drawer, confirm it renders, then set
+as default home BEFORE disabling the stock launcher (see lists/launcher-stock.txt).
+
+Useful Phase 3 configuration:
+- Remote button remapping (Settings → key mappings)
+- Screensaver / wallpaper options
+- Enable "show sideloaded apps"
+
+Settings → General → Backup: export Projectivy config; scripts/backup.sh pulls
+it from /sdcard/Download if present there.

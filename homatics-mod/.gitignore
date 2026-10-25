@@ -1,0 +1,7 @@
+device/runs/
+device/backups/
+pull/
+inventory/
+*.apk
+*.zip
+*.png

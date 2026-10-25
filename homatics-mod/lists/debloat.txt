@@ -1,0 +1,7 @@
+# DEBLOAT — safe to disable. EMPTY until Phase 2 fills it with evidence.
+# Rules:
+#  - every line must be a package name that appears verbatim in
+#    device baseline packages-system.txt
+#  - requires community precedent OR direct APK evidence from Phase 1
+#  - max 5 per batch; batches are applied bottom-up by scripts/apply.sh
+#  - voice/assistant components go to batch-voice.txt instead

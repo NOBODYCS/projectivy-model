@@ -1,0 +1,4 @@
+# Packages to pull and analyze in Phase 1 (one per line, exact names).
+# Agent: replace with every package matching homatics|sei|amlogic|rockchip
+# plus all com.google.android.* TV packages, taken from the baseline dump.
+# Until then, inventory.sh pulls ALL system packages when this file is absent.

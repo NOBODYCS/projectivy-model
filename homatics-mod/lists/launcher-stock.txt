@@ -1,0 +1,9 @@
+# Stock launcher packages — disabled ONLY in Phase 3, after Projectivy is
+# installed, launched, and confirmed as the default home app.
+# Verify exact names in baseline dump; common Google TV launcher packages:
+# com.google.android.tvlauncher
+# com.google.android.apps.tv.launcherx
+# com.google.android.apps.tv.launcherx.home
+# Recommendations/feed (launcher-dependent, same phase):
+# com.google.android.apps.tv.recommendations
+# com.google.android.tvrecommendations

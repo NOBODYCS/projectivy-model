@@ -1,0 +1,4 @@
+# WATCHLIST — conditional. Format: <package>  # condition and observed effect
+# OTA/update app: never disable (escape hatch)
+# OEM settings components: only after ADB dependency confirmed safe
+# Assistant/voice: see batch-voice.txt (user opted out of global assistant)

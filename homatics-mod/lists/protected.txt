@@ -1,0 +1,20 @@
+# PROTECTED — never disable, in any phase, for any reason
+# Verify each of these exists on the actual device before trusting the list.
+
+com.android.systemui
+com.android.packageinstaller
+com.android.defcontainer
+com.google.android.webview
+com.google.android.gms                # Play Services — partner apps depend on it
+com.google.android.gms
+com.android.vending
+com.netflix.ninja
+com.netflix.mediaclient
+com.amazon.avod.thirdpartyclient
+com.disney.disneyplus
+com.widevine.omacp
+# Widevine / media DRM components (verify exact names from dumpsys):
+android.media
+com.google.android.media
+# Homatics/SEI components confirmed by Phase 1 to gate hardware
+# (fill in from inventory.md: OTA, CEC, LED, HDMI, audio services)
