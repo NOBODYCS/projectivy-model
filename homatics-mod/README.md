@@ -95,7 +95,9 @@ bash scripts/restore.sh    # everything back to stock behavior
 
 ```
 scripts/       baseline, inventory, backup, verify, apply, revert-batch,
-               restore, set-setting, capture-buttons, wake-test
+               restore, set-setting, capture-buttons, wake-test, cec-tool
+               (CEC diagnostics + power_control_mode workaround; see
+               notes/cec-investigation.md and notes/rea-cec-pass.md)
 device/        baseline dumps, backups, per-run captures
 inventory/     per-package findings from REA
 pull/          pulled APKs
