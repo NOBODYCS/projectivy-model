@@ -322,3 +322,27 @@ directed and broadcast frames via /sys/class/cec/cmd, BELOW the Android HAL.
 
 Order of operations: `cec-tool.sh status` → `cec-tool.sh test` → `cec-tool.sh
 fix-on` + user standby test → REA pass per notes/rea-cec-pass.md.
+
+## Phase 8 — dual-client hypothesis test plan (2026-10-25, after Phase 7 conclusion)
+
+Phase 7 left one testable, root-cause-proving path that does not need root:
+the dual-CEC-client candidate from inventory/rea-cec.md. If
+com.sei.hdmi.services's second HAL client is what breaks broadcast TX,
+removing it should make broadcasts deterministic. Staged as a time-boxed,
+logged, fully revertible A/B test: `scripts/cec-ab.sh` (stage 1 = component
+disable, likely vendor-rejected; stage 2 = full package disable with
+PROTECTED-LIST EXCEPTION — the package is the suspect; keys may die while
+disabled, that is an observable outcome, revert via stage2-revert/restore.sh).
+
+Expected outcomes:
+- stage 2 + broadcasts ACK across standby/wake cycles → root cause PROVEN.
+  Then decide: keep disabled (accept remote-key risk, document in
+  protected.txt exception) or revert and use vendor fix + HA workaround.
+- stage 2 + broadcasts still NACK → dual-client theory refuted for TX;
+  the bug is inside hdmicecd itself → vendor bug report is the only fix
+  (notes/vendor-bug-report.md, ready to send) + HA/webOS workaround.
+
+Also ready: notes/vendor-bug-report.md (SEI Robotics / Homatics, evidence
+attached from this note and inventory/rea-cec.md). Send regardless of the
+A/B outcome — the decompiled SeiHdmiCecService.p() evidence is actionable
+for their firmware team.
