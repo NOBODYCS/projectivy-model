@@ -128,3 +128,32 @@ the directed-vs-broadcast asymmetry, but it is the only variable left.
 No settings, no package changes. All CEC settings verified identical to
 baseline (cec-settings.txt): hdmi_control_enabled=1, one_touch_play=1,
 auto_wakeup=1, auto_device_off=1, volume_control=1, earc_enabled=1.
+
+## Fix plan (2026-10-25, added after root-cause confirmation)
+
+Two parallel tracks, both runnable from this repo:
+
+1. **Workaround now — directed <Standby>**: AOSP `power_control_mode=to_tv`
+   makes the box send <Standby> DIRECTED to the TV instead of broadcast
+   (HdmiControlManager.POWER_CONTROL_MODE_TV = "to_tv"). Directed sends are
+   the one path proven to work on this box (evidence item 2). Apply with
+   `scripts/cec-tool.sh fix-on` (logged/restorable via set-setting.sh), then
+   standby the box and confirm the TV powers off. This fixes TV-off-on-standby
+   only; <Active Source> (one-touch-play input switching) is broadcast-only in
+   AOSP and stays broken until the vendor fix. Verify the correct storage key
+   first with `scripts/cec-tool.sh status` (some builds store it as
+   `cec_power_control_mode` or in cec_config.xml shared prefs).
+2. **Find the vendor bug — REA pass**: `notes/rea-cec-pass.md` has the exact
+   commands and questions to decompile com.sei.hdmi.services and the
+   DroidLogic CEC settings/overlay packages from the existing pull/ tree.
+
+Driver-level test (hypothesis A refinement): `scripts/cec-tool.sh test` sends
+directed and broadcast frames via /sys/class/cec/cmd, BELOW the Android HAL.
+- sysfs broadcast ACKs but HAL broadcast NACKs → bug is in the HAL/JNI/vendor
+  framework layer (REA pass will find it).
+- sysfs broadcast also NACKs → bug is in the Amlogic aocec driver itself;
+  REA pass is only useful for config, and the fix must come from the vendor.
+- writes rejected → no shell access to the driver; rely on HAL-level evidence.
+
+Order of operations: `cec-tool.sh status` → `cec-tool.sh test` → `cec-tool.sh
+fix-on` + user standby test → REA pass per notes/rea-cec-pass.md.

@@ -15,3 +15,5 @@
 2026-10-25T16:23:57+01:00 disable com.google.android.onetimeinitializer
 2026-10-25T16:45:33+01:00 disable com.google.android.play.games
 2026-10-25T16:45:33+01:00 disable com.google.android.syncadapters.calendar
+2026-10-25T17:53:15+01:00 revert-enable com.nes.recents
+2026-10-25T17:53:35+01:00 disable com.google.android.katniss

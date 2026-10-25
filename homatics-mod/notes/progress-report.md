@@ -218,6 +218,29 @@ re-disable. Nothing to do now.
   needed. applied.log has no entry for it (the revert attempt aborted on
   the SecurityException before logging, thanks to set -e).
 
+## Post-reboot regression found & fixed (2026-10-25, 17:55)
+
+User reported sluggishness "after full restart". Diagnostics: kernel up
+since ~15:37, but system_server DIED at 16:47:29 (dropbox SYSTEM_RESTART
+16:47:52, exactly one occurrence). Root cause (crash buffer tombstone):
+vendor PhoneWindowManager.handleHomeShortcuts (the Phase 3 home-hijack
+code) startActivity()s com.nes.recents/.RecentsActivity on a home-key
+path (likely double-press HOME); package was disabled in the Phase 3
+launcher batch → ActivityNotFoundException → "No pending exception
+expected" abort in InputDispatcher → SIGABRT, framework restart, every
+app respawned (= the sluggishness). Silent landmine: no symptom until
+that key path fires.
+
+Fix: com.nes.recents re-enabled via revert-batch.sh (logged). tvlauncher
+and partnercustomizer stay disabled — required for Projectivy to hold
+HOME; recents was optional. lists/launcher-stock.txt annotated with a
+do-not-redisable warning. verify.sh still OK (recents was never in
+debloat.txt). Load average ~1.1 afterwards is Netflix playback, not a
+problem; MemAvailable 1.5 GB ≈ baseline.
+
+Manual checklist: user confirms batches 1-4 otherwise working (Netflix,
+YouTube, remote, sound OK). Framework-crash regression resolved.
+
 ## Next steps
 
 1. User confirms manual per-batch checklist for batches 1-4 (Netflix DRM

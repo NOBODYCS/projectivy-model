@@ -6,7 +6,15 @@
 # Order: disable tvlauncher FIRST after new launcher confirmed, then the rest.
 # tvrecommendations moved to watchlist.txt (Continue Watching row decision,
 # re-evaluate after one week of Projectivy use).
+# com.nes.recents REVERTED to enabled 2026-10-25: vendor
+# PhoneWindowManager.handleHomeShortcuts startActivity()s
+# com.nes.recents/.RecentsActivity on a home-key path (likely double-press
+# HOME); with the package disabled this throws ActivityNotFoundException and
+# ABORTS system_server (SIGABRT in InputDispatcher, framework restart,
+# dropbox SYSTEM_RESTART 16:47:52). Regressed only when that key path fires —
+# worked fine for hours after Phase 3. Must stay enabled while the vendor
+# home-shortcut handler is compiled into the framework. Do NOT re-disable.
 
 com.google.android.tvlauncher  # stock Google TV launcher (the HOME app)
 com.nes.leanbacklauncher.partnercustomizer  # partner customizer feeding the stock launcher
-com.nes.recents  # stock launcher Recents screen
+com.nes.recents  # stock launcher Recents screen — REVERTED to enabled, see header note
