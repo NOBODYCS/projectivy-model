@@ -238,6 +238,19 @@ standby; no input switching). Timeline forensics from dumpsys history:
   PS5 back to sleep. LG SimpLink/Quick Start+ behavior — TV-side,
   independent of the box.
 
+### Repro scoreboard (final, 2026-10-25 evening)
+
+Every controllable trigger for the 50 s good window has been tried and
+REFUTED: re-init toggle alone; re-init + standby/wake cycle; fresh
+settings WRITE of power_control_mode=to_tv + re-init + standby/wake
+(the exact original sequence, 19:10 — NACK from first send); PS5
+on-transition (18:28, window absent); full reboot (fresh stack NACK
+from first boot send). The window was a one-off bus state (plausibly a
+rare timing condition in hdmicecd's dual-client arbitration) and cannot
+be reproduced on demand. No software trigger, ritual, or setting exists
+that restores broadcast TX on 14.8.8963. Remaining: physical port/cable
+exclusion (user hands), vendor bug report, HA/webOS workaround.
+
 ### Where this leaves the CEC problem
 
 Box broadcasts are broken in ALL controllable states (steady, post
