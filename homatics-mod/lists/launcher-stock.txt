@@ -1,9 +1,12 @@
 # Stock launcher packages — disabled ONLY in Phase 3, after Projectivy is
-# installed, launched, and confirmed as the default home app.
-# Verify exact names in baseline dump; common Google TV launcher packages:
-# com.google.android.tvlauncher
-# com.google.android.apps.tv.launcherx
-# com.google.android.apps.tv.launcherx.home
-# Recommendations/feed (launcher-dependent, same phase):
-# com.google.android.apps.tv.recommendations
-# com.google.android.tvrecommendations
+# installed, launched, and confirmed as the default home app
+# (verify with `cmd package resolve-home` or dumpsys).
+# Names verified verbatim against packages-system.txt (no launcherx /
+# apps.tv.recommendations variants exist on this box — checked).
+# Order: disable tvlauncher FIRST after new launcher confirmed, then the rest.
+# tvrecommendations moved to watchlist.txt (Continue Watching row decision,
+# re-evaluate after one week of Projectivy use).
+
+com.google.android.tvlauncher  # stock Google TV launcher (the HOME app)
+com.nes.leanbacklauncher.partnercustomizer  # partner customizer feeding the stock launcher
+com.nes.recents  # stock launcher Recents screen

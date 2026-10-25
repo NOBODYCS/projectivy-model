@@ -1,6 +1,10 @@
 # Voice/Assistant batch — applied ALONE, never mixed with other packages.
-# Verify exact names in baseline dump first. Expected candidates on Google TV:
-# com.google.android.katniss          # Assistant
-# com.google.android.apps.googleassistant
+# From inventory/inventory.md: com.google.android.katniss is the only
+# Assistant component on this box. com.google.android.apps.googleassistant
+# is NOT installed (checked against packages-system.txt) — do not add from
+# memory.
+# Apply: bash scripts/apply.sh com.google.android.katniss
 # After applying: verify the remote mic key does not crash anything
 # (in-app YouTube/Netflix mic search must still work — that is the requirement).
+
+com.google.android.katniss    # Google Assistant (TV) stub

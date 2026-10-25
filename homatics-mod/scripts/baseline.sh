@@ -27,7 +27,7 @@ for f in getprop.txt meminfo-idle.txt processes-idle.txt alarm-dump.txt \
     settings-secure.txt)    CMD=(shell settings list secure) ;;
     settings-system.txt)    CMD=(shell settings list system) ;;
     cec-settings.txt)      CMD=(shell "settings list global | grep -i -E 'cec|hdmi'") ;;
-    feature-flags.txt)      CMD=(shell device_config) ;;
+    feature-flags.txt)     CMD=(shell device_config list) ;;
   esac
   echo "capturing $f"
   adb_cmd "${CMD[@]}" > "$f" 2>&1 || echo "WARN: $f capture failed" >&2

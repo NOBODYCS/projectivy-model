@@ -1,0 +1,17 @@
+2026-10-25T15:44:06+01:00 disable com.google.android.tvlauncher
+2026-10-25T15:44:36+01:00 disable com.google.android.tvrecommendations
+2026-10-25T15:45:22+01:00 disable com.nes.leanbacklauncher.partnercustomizer
+2026-10-25T15:46:55+01:00 revert-enable com.google.android.tvrecommendations
+2026-10-25T15:48:08+01:00 disable com.nes.recents
+2026-10-25T16:15:21+01:00 disable com.nes.remoteota.one
+2026-10-25T16:15:22+01:00 disable com.nes.remoteota.two
+2026-10-25T16:15:22+01:00 disable com.nes.remoteota.six
+2026-10-25T16:22:00+01:00 disable com.nes.dvb.playtest
+2026-10-25T16:22:00+01:00 disable com.nes.bugreportsender
+2026-10-25T16:23:55+01:00 disable android.autoinstalls.config.sei
+2026-10-25T16:23:55+01:00 disable com.android.tv.feedbackconsent
+2026-10-25T16:23:56+01:00 disable com.google.android.backdrop
+2026-10-25T16:23:56+01:00 disable com.google.android.feedback
+2026-10-25T16:23:57+01:00 disable com.google.android.onetimeinitializer
+2026-10-25T16:45:33+01:00 disable com.google.android.play.games
+2026-10-25T16:45:33+01:00 disable com.google.android.syncadapters.calendar

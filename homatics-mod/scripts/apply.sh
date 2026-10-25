@@ -10,12 +10,12 @@ if [[ $# -lt 1 ]]; then echo "usage: apply.sh <pkg> [pkg ...]"; exit 1; fi
 if [[ $# -gt 5 ]]; then echo "max 5 per batch (plan discipline)"; exit 1; fi
 
 for pkg in "$@"; do
-  if ! adb_cmd shell pm list packages | tr -d '\r' | grep -qx "package:$pkg"; then
+  if ! adb_cmd shell pm list packages | tr -d '\r' | grep -x "package:$pkg" > /dev/null; then
     echo "SKIP: $pkg not installed (check spelling against packages-all.txt!)"; continue
   fi
   echo "disabling $pkg"
   adb_cmd shell pm disable-user --user 0 "$pkg"
-  if adb_cmd shell pm list packages -d | tr -d '\r' | grep -qx "package:$pkg"; then
+  if adb_cmd shell pm list packages -d | tr -d '\r' | grep -x "package:$pkg" > /dev/null; then
     log_apply "disable" "$pkg"
     echo "adb shell pm enable '$pkg'" >> "$RESTORE"
     echo "  -> logged + mirrored to restore.sh"

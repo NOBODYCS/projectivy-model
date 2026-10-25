@@ -8,7 +8,8 @@ DEBLOAT="$REPO_ROOT/lists/debloat.txt"
 [[ -f "$DEBLOAT" ]] || { echo "no debloat.txt yet"; exit 0; }
 
 adb_cmd shell pm list packages -d | sed 's/package://' | tr -d '\r' | sort > /tmp/disabled-now.txt
-sort "$DEBLOAT" > /tmp/debloat-expected.txt
+# Strip comment lines and trailing "# ..." annotations before comparing.
+grep -v '^[[:space:]]*#' "$DEBLOAT" | sed 's/[[:space:]]#.*//; s/[[:space:]]*$//' | grep -v '^$' | sort > /tmp/debloat-expected.txt
 
 MISSING=$(comm -23 /tmp/debloat-expected.txt /tmp/disabled-now.txt)
 if [[ -n "$MISSING" ]]; then

@@ -21,3 +21,19 @@ fi
 
 echo "Stock behavior restored (package state + settings)."
 echo "Launcher: to return to stock launcher, re-enable it first, then Settings -> Home app."
+adb shell pm enable 'com.google.android.tvlauncher'
+adb shell pm enable 'com.google.android.tvrecommendations'
+adb shell pm enable 'com.nes.leanbacklauncher.partnercustomizer'
+adb shell pm enable 'com.nes.recents'
+adb shell pm enable 'com.nes.remoteota.one'
+adb shell pm enable 'com.nes.remoteota.two'
+adb shell pm enable 'com.nes.remoteota.six'
+adb shell pm enable 'com.nes.dvb.playtest'
+adb shell pm enable 'com.nes.bugreportsender'
+adb shell pm enable 'android.autoinstalls.config.sei'
+adb shell pm enable 'com.android.tv.feedbackconsent'
+adb shell pm enable 'com.google.android.backdrop'
+adb shell pm enable 'com.google.android.feedback'
+adb shell pm enable 'com.google.android.onetimeinitializer'
+adb shell pm enable 'com.google.android.play.games'
+adb shell pm enable 'com.google.android.syncadapters.calendar'

@@ -1,7 +1,26 @@
-# DEBLOAT — safe to disable. EMPTY until Phase 2 fills it with evidence.
-# Rules:
-#  - every line must be a package name that appears verbatim in
-#    device baseline packages-system.txt
-#  - requires community precedent OR direct APK evidence from Phase 1
-#  - max 5 per batch; batches are applied bottom-up by scripts/apply.sh
-#  - voice/assistant components go to batch-voice.txt instead
+# DEBLOAT — safe to disable. Phase 2 classification from inventory/inventory.md.
+# Rules (enforced):
+#  - every entry appears verbatim in device/runs/2026-10-25-143813/packages-system.txt
+#  - backed by direct APK evidence (inventory/inventory.md) — no memory-based names
+#  - max 5 per batch, grouped, applied via: bash scripts/apply.sh <pkgs...>
+#  - voice/assistant -> batch-voice.txt; launcher suite -> launcher-stock.txt
+# 12 entries (14 safe-to-disable verdicts minus katniss [voice] minus
+# tvrecommendations [launcher feed]).
+
+# --- vendor remote-chip OTA updaters (apply as ONE batch: telemetry trio) ---
+com.nes.remoteota.one    # Realsil remote BLE-chip OTA; Bugly/Tencent telemetry
+com.nes.remoteota.two    # Telink remote BLE-chip OTA; Bugly/Tinker telemetry
+com.nes.remoteota.six    # Nanosic remote BLE-chip OTA; Crashlytics/app-measurement
+
+# --- vendor test/telemetry (apply as ONE batch) ---
+com.nes.dvb.playtest     # DVB factory test tool (DVBTestService)
+com.nes.bugreportsender  # vendor bug-report uploader (GET_ACCOUNTS_PRIVILEGED)
+
+# --- Google one-shots (apply as ONE batch) ---
+android.autoinstalls.config.sei      # first-boot autoinstall config, no-op after provisioning
+com.android.tv.feedbackconsent       # TV feedback-consent UI; no boot receivers, no own endpoints
+com.google.android.backdrop          # Daydream/backdrop screensaver imagery
+com.google.android.feedback          # crash/feedback reporter (telemetry)
+com.google.android.onetimeinitializer  # post-setup one-shot, already ran
+com.google.android.play.games        # Play Games TV app
+com.google.android.syncadapters.calendar  # calendar sync adapter, no calendar on TV

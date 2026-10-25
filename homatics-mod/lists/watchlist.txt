@@ -1,4 +1,17 @@
-# WATCHLIST — conditional. Format: <package>  # condition and observed effect
-# OTA/update app: never disable (escape hatch)
-# OEM settings components: only after ADB dependency confirmed safe
-# Assistant/voice: see batch-voice.txt (user opted out of global assistant)
+# WATCHLIST — conditional entries from inventory/inventory.md.
+# Format: <package>  # condition and observed effect to verify.
+# Launcher-suite watchlist items (tvlauncher, partnercustomizer, recents)
+# moved to launcher-stock.txt — no package may appear in more than one list.
+# Each gets a DEDICATED verification batch (checklists/per-batch.md) before
+# promotion to debloat or rejection to protected.
+
+com.google.android.tvrecommendations  # keep enabled if home-screen Continue Watching row is wanted; re-evaluate after one week of Projectivy use
+com.droidlogic.android.tv      # only if DVB/live TV unused (Tuner/DVR/EPG/OAD); re-test standby after — TimerSuspendService
+com.droidlogic.tv.extras       # auto-sleep timer (TimerSuspendService/Receiver); test standby behavior in its own batch
+com.google.android.tv.remote.service  # phone-as-remote stack (INJECT_EVENTS, BT privileged); only if unused — verify physical remote after
+com.nes.coreservice            # vendor AIDL hub (hotel mode, PERIODIC_REBOOT, ip-api.com); solo batch — watch vendor features/reboots
+com.nes.seilivetv              # RESOLVED: ships DISABLED by vendor (baseline packages-disabled.txt, dumpsys enabled=2); shell pm enable rejected (SecurityException) — no batch possible or needed
+com.nes.seiserialportrouter    # serial/radar-sensor services; only if no soundbar/serial hardware attached
+com.nes.skywayclient           # hotel/smart-home platform + FirmwareCheckService; confirm box OTA unaffected FIRST
+com.nes.sound.daemon           # audio state daemon (EQ/atmos/surround persist keys); test audio output after
+com.nes.sound.pair             # NES soundbar BT pairing; only if no soundbar pairing is used

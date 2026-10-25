@@ -2,6 +2,7 @@ device/runs/
 device/backups/
 pull/
 inventory/
+.vibe/
 *.apk
 *.zip
 *.png

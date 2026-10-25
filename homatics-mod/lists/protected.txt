@@ -1,20 +1,55 @@
-# PROTECTED — never disable, in any phase, for any reason
-# Verify each of these exists on the actual device before trusting the list.
+# PROTECTED — never disable, in any phase, for any reason.
+# Composition: 34 protected verdicts from inventory/inventory.md (incl.
+# com.nes.blerc and com.sei.hdmi.services, with evidence below) + 2
+# /vendor-unreadable packages verified via dumpsys evidence + 4 entries
+# enforced by the README principles (marked). Total: 40 entries.
 
-com.android.systemui
-com.android.packageinstaller
-com.android.defcontainer
-com.google.android.webview
-com.google.android.gms                # Play Services — partner apps depend on it
-com.google.android.gms
-com.android.vending
-com.netflix.ninja
-com.netflix.mediaclient
-com.amazon.avod.thirdpartyclient
-com.disney.disneyplus
-com.widevine.omacp
-# Widevine / media DRM components (verify exact names from dumpsys):
-android.media
-com.google.android.media
-# Homatics/SEI components confirmed by Phase 1 to gate hardware
-# (fill in from inventory.md: OTA, CEC, LED, HDMI, audio services)
+# --- kit principles (README: never disable) ---
+com.android.systemui           # README protected list
+com.netflix.ninja              # README: Netflix components never disabled
+com.netflix.tokenmanager       # README: Netflix DRM/token component
+com.android.vending            # Play Store — needed to install Projectivy (Phase 3)
+
+# --- /vendor-unreadable, dumpsys evidence (APK pull denied) ---
+com.droidlogic.tvinput         # TV_INPUT_HARDWARE, HDMI_CEC, INJECT_EVENTS, DEVICE_POWER, REBOOT, EPG — DVB/HDMI live-TV input stack
+com.google.android.networkstack.tethering.google  # pure RRO overlay on tethering module; zero gain, keep
+
+# --- vendor hardware gating (direct evidence) ---
+com.nes.blerc                  # BLE remote service — the physical remote depends on it; mute/volume injection path (button-inventory analysis)
+com.sei.hdmi.services          # HDMI/CEC manager — intercepts every remote key (mSeiHdmiCecManager, all 11 buttons); CEC/audio persist keys; amhdmitx sysfs
+com.nes.tvglobalkeyhandler     # hotkey router (GLOBAL_BUTTON, NETFLIX_KEY) — Netflix/YouTube/Prime/Apps remote buttons die without it
+com.droidlogic.tv.settings     # vendor TV Settings: SEIService, HdmiService, CEC/HDR/sound slices
+com.droidlogic.overlay         # RRO overlay carrying CEC configuration (cecPowerControlMode, one-touch play)
+com.droidlogic.systemui.overlay  # SystemUI resource overlay
+com.droidlogic.tvprovider.overlay  # TV/EPG provider overlay
+com.droidlogic.wifitetheringoverlay  # WiFi-tethering overlay
+com.android.tv.sei.overlay.framework  # SEI framework RRO overlay
+
+# --- Google core / mainline / DRM ---
+com.google.android.gms         # Play services core: Widevine/DRM, licensing, GMS certification
+com.google.android.gsf         # Google Services Framework
+com.google.android.webview     # WebView provider
+com.google.android.packageinstaller  # package manager UI (README: package manager)
+com.google.android.permissioncontroller  # runtime permission controller (mainline)
+com.google.android.overlay.modules.permissioncontroller
+com.google.android.overlay.modules.permissioncontroller.forframework
+com.google.android.modulemetadata
+com.google.android.overlay.modules.modulemetadata.forframework
+com.google.android.ext.services
+com.google.android.ext.shared
+com.google.android.overlay.modules.ext.services
+com.google.android.safetycenter.resources
+com.google.android.overlay.gtvsconfig
+com.google.android.overlay.googlewebview
+com.google.android.tv.overlay.wifi.resources
+com.google.android.tv.settings.energymodes.resoverlay
+
+# --- Google UX/system dependencies ---
+com.google.android.apps.mediashell  # Chromecast built-in receiver — casting dies without it
+com.google.android.inputmethod.latin  # system keyboard
+com.google.android.marvin.talkback   # accessibility (TalkBack)
+com.google.android.tts               # system TTS engine
+com.google.android.partnersetup      # partner/GMS certification setup
+com.google.android.tvsetup.partnercustomizer  # partner setup customization
+com.google.android.tungsten.setupwraith     # setup deferred jobs + SystemUpdateService
+com.google.android.tv.axel           # remote entry handling (IrService, BT connect)

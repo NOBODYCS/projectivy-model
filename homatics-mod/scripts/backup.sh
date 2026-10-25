@@ -14,7 +14,7 @@ adb_cmd shell settings list system      | tr -d '\r' > "$DIR/settings-system.txt
 adb_cmd shell dumpsys package           | tr -d '\r' > "$DIR/dumpsys-package.txt"
 
 # Projectivy backup file (Projectivy Settings -> General -> Backup, if exported to /sdcard)
-adb_cmd shell "ls /sdcard/Download/ 2>/dev/null | grep -i -E 'projectivy|backup'" | tr -d '\r' | while read -r f; do
+adb_cmd shell "ls /sdcard/Download/ 2>/dev/null | grep -i -E 'projectivy|backup' || true" | tr -d '\r' | while read -r f; do
   adb_cmd pull "/sdcard/Download/$f" "$DIR/" >/dev/null 2>&1 || true
 done
 
